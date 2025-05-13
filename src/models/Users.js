@@ -4,7 +4,7 @@ const sequelize = require('../config/database');
 //importando o arquivo .js configurador do database
 
 //definindo o Model User(tabela de usuários)
-const user = sequelize.define('User', { //definindo o modelo user, nossa tabela de users
+const User = sequelize.define('User', { //definindo o modelo user, nossa tabela de users
     name: { 
         type: DataTypes.STRING(100), //definir o tipo de dado da coluna "name" da tabela
         allowNull: false //não permite que o campo esteja vazio

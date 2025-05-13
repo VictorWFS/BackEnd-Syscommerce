@@ -1,7 +1,7 @@
 const express = require('express'); // inicializando o servidor express
 const sequelize = require('../src/config/database'); //fazendo a conexão do sequelize com nosso arquivo de configuração database
 const user = require('../src/models/user'); // definindo o model do DB que será utilizado, no caso, cada modelo é uma tabela
-
+require('./models/Associations');
 const app = express() //definindo 'app' como o comunicador do servidor express
 const PORT = process.env.PORT || 3000; //definindo a porta em que o servidor irá rodar
 
