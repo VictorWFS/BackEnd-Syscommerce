@@ -39,5 +39,42 @@ const register = async (req, res) => {
 
 // ================ login ===================
 
-//continuar aqui, o login
+const login = async (req, res) => {
+    try {
+        const {email, password} = req.body;
+
+        //buscar o usuário pelo e-mail
+        const user = await User.findOne({where: {email}});
+        if (user) {
+            return res.status(401).json({email: 'Credenciais Inválidas'});
+        }
+
+        //verificando se a senha está correta
+        const senhaCorreta = await bcrypt.compare(password, user.password_hash);
+        if (!senhaCorreta) {
+            return res.status(401).json({error: 'Credenciais Inválidas'})
+        }
+
+        //gerar o token JWT
+        const token = jwt.sign(
+            {
+                id: user.id,
+                role: user.role
+            },
+            process.env.JWT_SECRET,
+            {expiresIn: 'id'} //token valido por 1 dia
+        );
+
+        const {password_hash: _, ...userWithoutPassword} = user.toJSON();
+        res.status(200).json({user: userWithoutPassword, token})
+    } catch (error) {
+        console.error('Erro no login: ', error);
+        res.status(500).json({error: 'Erro ao fazer login'});
+    }
+};
+
+module.exports = {
+    register,
+    login
+};
 
