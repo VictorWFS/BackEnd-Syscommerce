@@ -6,8 +6,10 @@ require('dotenv').config({path: 'auth.env'})
 
 const saltRounds = 10; //numero de voltas de hash que o bcrypt vai usar na senha
 
+//função para registrar novo usuário
 const register = async (req, res) => {
     try {
+        //capturando credenciais obrigatórios para um novo usuário
         const {name, email, password} = req.body;
 
         //verificar se já existe um usuário com o mesmo e-mail
@@ -17,6 +19,7 @@ const register = async (req, res) => {
         }
 
         //aqui estamos criptografando a senha
+        //utilizando await pois está buscando a senha no banco para fazer o hash
         const password_hash = await bcrypt.hash(password, saltRounds);
         
         //criando o usuário no banco
