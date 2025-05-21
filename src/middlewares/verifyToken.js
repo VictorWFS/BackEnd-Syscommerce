@@ -22,7 +22,11 @@ const verifyToken = (req, res, next) => {
 
         //adiciona o usuário decodificado na requisição
         req.user = decoded;
+
+        next()
     } catch (error) {
-        
+        return res.status(401).json({error: 'Token inválido ou expirado'});
     }
-}
+};
+
+module.exports = verifyToken;
