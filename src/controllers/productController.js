@@ -8,13 +8,13 @@ const getAllProducts = async (req, res) => {
         const {
             category,
             search,
-            sort = 'createdAt',
+            sort = 'createdAt', //ordenando conforme data de criação
             order = 'desc',
             limit = 10,
-            page = 1 //ordenando conforme data de criação
+            page = 1 
         } = req.query;
 
-        const where = {}
+        const where = {};
 
         //filtrando por categoria
         if (category) {
@@ -28,7 +28,9 @@ const getAllProducts = async (req, res) => {
                 { description: {[Op.like]: `%${search}%`}}
             ];
         }
-
+        
+        
+        //calcula a quantidade de produtos que serao mostrados por pagina
         const offSet = (page - 1) * limit;
 
         //consulta com filtros, ordenação e categoria incluída
@@ -40,8 +42,16 @@ const getAllProducts = async (req, res) => {
             offset: Number(offset)
         });
 
+        //calculando o total de páginas e arredondando com o math.ceil()
+        const totalPages = Math.ceil(total / limit);
+
+        res.json({products, total, page: Number(page), totalPages})
+
 
     } catch (error) {
-        
+        console.error('Erro ao buscar produtos', error);
+        res.status(500).json({error: 'Erro ao buscar produtos'});
     }
-}
+};
+
+module.exports = { getAllProducts };

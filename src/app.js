@@ -15,6 +15,10 @@ const authRoutes = require('./routes/auth.routes');
 //definindo um prefixo para o grupo de rotas de autenticação
 app.use('/api/auth', authRoutes)
 
+//Rota de produtos
+const productRoutes = require('./routes/product.routes')
+app.use('/api/products', productRoutes)
+
 
 sequelize.sync({alter: true}) //sincronizando o sequelize com o DB. Alter=True serve para o sequelize atualizar o banco toda vez que houver alguma mudança
     .then(() => { //após sincronizar ele executa a resposta da promise. Then é usado para tratar o sucesso de uma promise, pois como o sequelize.sync
