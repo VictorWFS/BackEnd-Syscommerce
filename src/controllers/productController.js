@@ -47,11 +47,32 @@ const getAllProducts = async (req, res) => {
 
         res.json({products, total, page: Number(page), totalPages})
 
+    const getProductById = async (req, res) => {
+    //captura do parâmetro id no corpo da req, passando para int
+    const {id} = parseInt(req.params.id, 10);
+    
+    //verificando se o ID é, de fato, um número
+    if (isNaN(id)) {
+        return res.status(400).json({erro: 'ID inválido'})
+    };
+
+    const product = await Product.findByPk(id, {
+        include: [{models: Category, attributes: id, name}]
+    });
+
+    if (!product) {
+        return res.status(400).json({erro: 'Produto não encontrado'})
+    };
+
+    res.json(product);
+}
 
     } catch (error) {
         console.error('Erro ao buscar produtos', error);
-        res.status(500).json({error: 'Erro ao buscar produtos'});
+        res.status(500).json({error: 'Erro ao buscar produto'});
     }
 };
+
+
 
 module.exports = { getAllProducts };
