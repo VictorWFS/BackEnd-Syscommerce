@@ -37,7 +37,11 @@ const Product = sequelize.define('Product', {
         type: DataTypes.BOOLEAN,
         allowNull: false,
         defaultValue: true
-    }
+    },
+    image_url: {
+    type: DataTypes.STRING,
+    allowNull: true
+}
 }, {
     tableName: 'products',
     timestamps: true
