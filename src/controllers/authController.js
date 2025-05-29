@@ -23,7 +23,7 @@ const register = async (req, res) => {
         const password_hash = await bcrypt.hash(password, saltRounds);
         
         //criando o usuário no banco
-        const newUser = User.create({
+        const newUser = await User.create({
             name,
             email,
             password_hash,
@@ -48,7 +48,7 @@ const login = async (req, res) => {
 
         //buscar o usuário pelo e-mail
         const user = await User.findOne({where: {email}});
-        if (user) {
+        if (!user) {
             return res.status(401).json({email: 'Credenciais Inválidas'});
         }
 
@@ -65,7 +65,7 @@ const login = async (req, res) => {
                 role: user.role
             },
             process.env.JWT_SECRET,
-            {expiresIn: 'id'} //token valido por 1 dia
+            {expiresIn: '1d'} //token valido por 1 dia
         );
 
         const {password_hash: _, ...userWithoutPassword} = user.toJSON();
