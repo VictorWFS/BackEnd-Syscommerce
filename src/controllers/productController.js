@@ -1,6 +1,7 @@
 const {Op} = require('sequelize');
 const Product = require('../models/Product')
 const Category = require('../models/Category');
+const upload = require('../middlewares/upload');
 
 const getAllProducts = async (req, res) => {
     try {
@@ -73,6 +74,93 @@ const getAllProducts = async (req, res) => {
     }
 };
 
+const uploadProductImage = async (req, res) => {
+    try {
+        if (res.user.role !== 'admin') {
+            return res.status(403).json({error: 'Ação restrita apenas a administradores'})
+        }
 
+        const produtcId = parseInt(req.params.id, 10);
+        const product = await Product.findByPk(produtcId);
 
-module.exports = { getAllProducts };
+        if (!product) {
+            return res.status(404).json({error: 'Produto não encontrado'});
+        }
+
+        if (!req.file) {
+            return res.status(400).json({error: 'Nenhum arquivo enviado'});
+        }
+        product.image_url = req.file.filename;
+        await product.save();
+
+        res.status(200).json({message: 'Imagem adicionada com sucesso', image_url: product.image_url});
+    } catch (error) {
+        console.error('Erro ao fazer upload da imagem', error);
+        res.status(500).json({error: 'Erro ao fazer upload da imagem'})
+    }
+};
+
+const updateProduct = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({error: 'Ação restrita somente a administradores'})
+        }
+
+        const productId = parseInt(req.params.id, 10);
+        const product = await Product.findByPk(productId);
+
+        if (!product) {
+            return res.status(404).json({error: 'Produto não encontrado'});
+        }
+
+        const {
+            name,
+            description,
+            price,
+            stock,
+            category_id
+        } = req.body;
+
+        product.name = name || product.name;
+        product.description = description || product.description;
+        product.price = price !== undefined ? price : product.price;
+        product.stock = stock !== undefined ?stock: product.stock;
+        product.category_id = category_id || product.category_id;
+
+        await product.save();
+
+        res.json({message: 'Produto atualizado com sucesso', product});
+    } catch (error) {
+        console.error('Erro ao atualizar produto', error);
+        res.status(500).json({error: 'Erro ao atualizar produto'});
+    }
+}
+
+const deleteProduct = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({error: 'Ação restrita somente a administradores'})
+        }
+
+        const productId = parseInt(req.params.id, 10);
+        const product = await Product.findByPk(productId);
+
+        if (!product) {
+            return res.status(404).json({error: 'Produto não encontrado'})
+        }
+
+        await product.destroy();
+
+        res.json({message: 'Produto deletado com sucesso'})
+    } catch (error) {
+        console.error('Erro ao deletar o produto', error);
+        res.status(500).json({error: 'Erro ao deletar o produto'})
+    }
+};
+
+module.exports = { 
+    getAllProducts,
+    uploadProductImage,
+    updateProduct,
+    deleteProduct
+};

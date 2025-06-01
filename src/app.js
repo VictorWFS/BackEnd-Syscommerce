@@ -28,8 +28,14 @@ app.use('/api/cart', CartRoutes);
 const addressRoutes = require('./routes/address.routes');
 app.use('/api/addresses', addressRoutes);
 
-const orderRoutes = require('./routes/order.routes')
+const orderRoutes = require('./routes/order.routes');
 app.use('/api/orders', orderRoutes);
+
+const adminRoutes = require('./routes/admin.routes');
+app.use('/api/admin', adminRoutes);
+
+const errorHandler = require('./middlewares/errorHandler');
+app.use(errorHandler);
 sequelize.sync({alter: true}) //sincronizando o sequelize com o DB. Alter=True serve para o sequelize atualizar o banco toda vez que houver alguma mudança
     .then(() => { //após sincronizar ele executa a resposta da promise. Then é usado para tratar o sucesso de uma promise, pois como o sequelize.sync
         // é assincrono e leva tempo, quando terminar o then vai tratar o sucesso da promise do sync.
