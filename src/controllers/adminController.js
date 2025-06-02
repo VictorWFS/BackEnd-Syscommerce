@@ -116,4 +116,8 @@ const getAllOrdersAdmin = async (req, res) => {
     }
 };
 
-module.exports = {getAllUsers}
+module.exports = {
+    getAllUsers,
+    getAllProductsAdmin,
+    getAllOrdersAdmin
+}
