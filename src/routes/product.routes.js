@@ -4,7 +4,7 @@ const router = express.Router();
 const verifyToken = require('../middlewares/verifyToken')
 
 //importando o controller com a lógica(função) da rota
-const {getAllProducts, deleteProduct, updateProduct} = require('../controllers/productController');
+const {getAllProducts, deleteProduct, updateProduct, uploadProductImage} = require('../controllers/productController');
 const { verify } = require('jsonwebtoken');
 
 //rota pública para listar todos os produtos com filtros, busca e paginação
