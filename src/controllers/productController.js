@@ -10,10 +10,12 @@ const getAllProducts = async (req, res) => {
             category,
             search,
             sort = 'createdAt', //ordenando conforme data de criação
-            order = 'desc',
-            limit = 10,
-            page = 1 
+            order = 'desc'
         } = req.query;
+
+        const page = parseInt(req.query.page, 10) || 1;
+        const limit = parseInt(req.query.limit, 10) || 10;
+        const offSet = (page - 1) * limit;
 
         const where = {};
 
@@ -32,25 +34,36 @@ const getAllProducts = async (req, res) => {
         
         
         //calcula a quantidade de produtos que serao mostrados por pagina
-        const offSet = (page - 1) * limit;
+        
 
         //consulta com filtros, ordenação e categoria incluída
         const {rows: products, count: total} = await Product.findAndCountAll({
             where,
             include: [{model: Category, attributes: ['id', 'name']}],
             order: [[sort, order]],
-            limit: Number(limit),
-            offset: Number(offset)
+            limit,
+            offSet
         });
 
         //calculando o total de páginas e arredondando com o math.ceil()
         const totalPages = Math.ceil(total / limit);
 
-        res.json({products, total, page: Number(page), totalPages})
+        res.json({products, total, page, totalPages})
 
-    const getProductById = async (req, res) => {
-    //captura do parâmetro id no corpo da req, passando para int
-    const {id} = parseInt(req.params.id, 10);
+
+
+    } catch (error) {
+        console.error('Erro ao buscar produtos', error);
+        res.status(500).json({error: 'Erro ao buscar produto'});
+    }
+};
+
+const getProductById = async (req, res) => {
+    try {
+        //captura do parâmetro id no corpo da req, passando para int
+    const id = parseInt(req.params.id, 10);
+    console.log('🟡 ID recebido:', req.params.id, '| Após parseInt:', id);
+
     
     //verificando se o ID é, de fato, um número
     if (isNaN(id)) {
@@ -58,7 +71,7 @@ const getAllProducts = async (req, res) => {
     };
 
     const product = await Product.findByPk(id, {
-        include: [{models: Category, attributes: id, name}]
+        include: [{model: Category, attributes: ['id', 'name']}]
     });
 
     if (!product) {
@@ -66,11 +79,48 @@ const getAllProducts = async (req, res) => {
     };
 
     res.json(product);
-}
 
     } catch (error) {
-        console.error('Erro ao buscar produtos', error);
-        res.status(500).json({error: 'Erro ao buscar produto'});
+        console.error('Erro ao buscar produto', error);
+        res.status(500).json({error: 'Erro ao buscar produto'})
+    }
+    
+};
+
+const createProduct = async (req, res) => {
+    try {
+        if (req.user.role !== 'admin') {
+            return res.status(403).json({error: 'Ação restrita a administradores'});
+        }
+        const {
+            name,
+            description,
+            price,
+            stock,
+            image_url,
+            category_id
+        } = req.body;
+
+        if (!name || !price || !stock || !category_id) {
+            return res.status(400).json({error: 'Campos obrigatórios: name, price, stock, category_id'})
+        }
+
+        const newProduct = await Product.create({
+            name,
+            description,
+            price,
+            stock,
+            image_url,
+            category_id
+        });
+
+        res.status(201).json({
+            message: 'Produto criado com sucesso!',
+            product: newProduct
+        });
+    } catch (error) {
+        console.error('Erro ao criar produto', error);
+        res.status(500).json({error: 'Erro ao criar produto'});
     }
 };
 
@@ -162,5 +212,7 @@ module.exports = {
     getAllProducts,
     uploadProductImage,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getProductById,
+    createProduct
 };

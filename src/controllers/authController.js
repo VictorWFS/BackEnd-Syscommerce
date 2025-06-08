@@ -10,7 +10,7 @@ const saltRounds = 10; //numero de voltas de hash que o bcrypt vai usar na senha
 const register = async (req, res) => {
     try {
         //capturando credenciais obrigatórios para um novo usuário
-        const {name, email, password} = req.body;
+        const {name, email, password, role} = req.body;
 
         //verificar se já existe um usuário com o mesmo e-mail
         const existingUser = await User.findOne({where: {email} })
@@ -27,7 +27,7 @@ const register = async (req, res) => {
             name,
             email,
             password_hash,
-            role: 'customer'
+            role: role || 'customer'
         })
 
         //retornando o usuário sem a senha
