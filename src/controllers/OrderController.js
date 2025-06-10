@@ -1,19 +1,14 @@
-//Verifica se o address_id existe e pertence ao usuário logado
-//Busca todos os CartItem do usuário logado
-//Calcula o valor total do pedido
-//Cria o Order
-//Para cada item do carrinho, cria um OrderItem
-//Limpa o carrinho
-
 const Order = require('../models/Order');
 const OrderItem = require('../models/OrderItem');
 const CartItem = require('../models/CartItem');
 const Product = require('../models/Product');
+const Address = require('../models/Address');
 
 const createOrder = async (req, res) => {
     try {
         const userId = req.user.id;
-        const {address_id} = req.body;
+        const address_id = req.body.address_id;
+
 
         //verificando se o endereço existe e pertence ao usuário atual
         const address = await Address.findOne({
@@ -26,8 +21,11 @@ const createOrder = async (req, res) => {
         //busca os itens do carrinho
         const cartItems = await CartItem.findAll({
             where: {user_id: userId},
-            include: [Product]
+            include: [{model: Product}]
         });
+
+        console.log(cartItems);
+        
         //verifica se o carrinho está vazio
         if (cartItems.length === 0) {
             return res.status(400).json({error: 'Carrinho vazio'})
@@ -35,26 +33,43 @@ const createOrder = async (req, res) => {
 
         //calculando o valor total do pedido
         let total = 0;
-        cartItems.forEach(item => {
-            total += item.quantity * item.product.price;
-        });
+        const orderItems = [];
+
+        for (const item of cartItems) {
+            if (!item.Product || isNaN(parseFloat(item.Product.price))) {
+                return res.status(400).json({ error: `Produto com ID ${item.product_id} não encontrado` });
+            }
+
+            const price = parseFloat(item.Product.price);
+            const subtotal = item.quantity * price
+            total += subtotal;
+
+            orderItems.push({
+                order_id: null,
+                product_id: item.Product.id,
+                quantity: item.quantity,
+                unit_price: parseFloat(item.Product.price)
+            });
+        }
+
+        const fullAddress = `${address.street}, ${address.number} - ${address.neighborhood}, ${address.city} - ${address.state}, ${address.postal_code} `
 
         //criando o pedido
         const order = await Order.create({
             user_id: userId,
-            address_id,
-            total
+            shipping_address: fullAddress,
+            total_amount: total
         });
 
-        //criando os itens do pedido
-        const orderItems = await cartItems.map(item => ({
-            order_id: order.id,
-            product_id: item.product_id,
-            quantity: item.quantity,
-            price: item.product.price
+        const orderItemsWithId = orderItems.map(item => ({
+            ...item,
+            order_id: order.id
         }));
 
-        await OrderItem.bulkCreate(orderItems);
+        //criando os itens do pedido
+        await OrderItem.bulkCreate(orderItemsWithId, { validate: true });
+
+        
 
         await CartItem.destroy({where: {user_id: userId}})
 
@@ -62,11 +77,11 @@ const createOrder = async (req, res) => {
             message: 'Pedido realizado com sucesso',
             order_id: order.id,
             total,
-            items: orderItems
+            items: orderItemsWithId
         });
 
     } catch (error) {
-        console.error('Erro ao criar pedido');
+        console.error('Erro ao criar pedido', error);
         res.status(500).json({error: 'Erro ao criar pedido'});
     }
 };
@@ -81,7 +96,7 @@ const getUserOrders = async (req, res) => {
             include: [
                 {
                     model: Address,
-                    attributes: ['street', 'city', 'state', 'zip_code']
+                    attributes: ['street', 'city', 'state', 'postal_code']
                 },
                 {
                     model: OrderItem,

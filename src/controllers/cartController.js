@@ -1,4 +1,4 @@
-const cartItem = require('../models/CartItem');
+const CartItem = require('../models/CartItem');
 const product = require('../models/Product');
 const category = require('../models/Category');
 const Product = require('../models/Product');
@@ -8,7 +8,7 @@ const getUserCart = async (req, res) => {
     try {
         const userId = req.user.id; //vem do token decodificado pelo middleware
 
-        const cartItems = await cartItem.findAll({
+        const cartItems = await CartItem.findAll({
             where: {user_id: userId},
             include: [{ //include significa JOIN em SQL
                 model: Product, //definindo qual tabela será feita o join

@@ -34,6 +34,12 @@ OrderItem.belongsTo(Product, {foreignKey: 'product_id'});
 User.hasMany(Address, {foreignKey: 'user_id'});
 Address.belongsTo(User, {foreignKey: 'user_id'});
 
+Order.belongsTo(Address, { foreignKey: 'address_id' });
+Address.hasMany(Order, { foreignKey: 'address_id' });
+
+
+
+
 module.exports = {
     User,
     Category,
