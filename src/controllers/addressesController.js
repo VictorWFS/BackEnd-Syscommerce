@@ -21,18 +21,27 @@ const getUserAddresses = async (req, res) => {
 const addAddress = async (req, res) => {
     try {
         const userId = req.user.id;
-        const {street, city, state, zip_code} = req.body;
+        const {
+            street, 
+            number,
+            neighborhood,
+            city, 
+            state, 
+            postal_code
+        } = req.body;
 
-        if (!street || !city || !state || !zip_code) {
+        if (!street || !number || !neighborhood || !city || !state || !postal_code) {
             return res.status(400).json({error: 'Todos os campos são obrigatórios'});
         }
 
         const newAddress = await Address.create({
             user_id:  userId,
             street,
+            number,
+            neighborhood,
             city,
             state,
-            zip_code
+            postal_code
         });
 
         res.status(201).json({message: 'Endereço adicionado com sucesso', address: newAddress})

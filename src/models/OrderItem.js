@@ -24,7 +24,7 @@ const OrderItem = sequelize.define('OrderItem', {
 }, {
     tableName: 'order_items',
     createdAt: 'created_at',
-    updated: false
+    updateAt: false
 });
 
 module.exports = OrderItem;

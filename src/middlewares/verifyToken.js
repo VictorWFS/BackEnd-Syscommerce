@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 //carregando o JWT_SECRET do .env
-require('dotenv').config({path: 'auth.env'});
+require('dotenv').config('dotenv');
 
 
 const verifyToken = (req, res, next) => {

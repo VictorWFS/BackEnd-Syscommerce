@@ -1,7 +1,10 @@
-const {Users, Order, Product, Category} = require('../models/Users');
+const User = require('../models/Users');
+const Order = require('../models/Order');
+const Product = require('../models/Product');
+const Category = require('../models/Category')
 
 const {Op} = require('sequelize');
-
+console.log('User model:', User);
 const getAllUsers = async (req, res) => {
     try {
         if (req.user.role !== 'admin') {
@@ -12,9 +15,9 @@ const getAllUsers = async (req, res) => {
             attributes: ['id', 'name', 'email', 'role', 'createdAt'],
             include: [{
                 model: Order,
-                attributes: ['id', 'status', 'total', 'createdAt']
+                attributes: ['id', 'status', 'total_amount', 'createdAt']
             }],
-            order: [['created', 'DESC']]
+            order: [['createdAt', 'DESC']]
         });
 
         res.json(users)
