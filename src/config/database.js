@@ -1,11 +1,22 @@
-const {Sequelize} = require('sequelize'); //importando a
-//principal classe do sequelize para fazer a conexão com o banco
+const { Sequelize } = require('sequelize');
+require('dotenv').config();
 
-require('dotenv').config('dotenv');//pegue as variáveis que estão no arquivo .env
-//para dentro do meu projeto
-console.log('Senha:', process.env.DB_PASSWORD, '| Tipo:', typeof process.env.DB_PASSWORD);
+let sequelize;
 
-const sequelize = new Sequelize({
+if (process.env.DATABASE_URL) {
+  sequelize = new Sequelize(process.env.DATABASE_URL, {
+    dialect: 'postgres',
+    protocol: 'postgres',
+    logging: false,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false
+      }
+    }
+  });
+} else {
+  sequelize = new Sequelize({
     database: process.env.DB_NAME,
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
@@ -13,6 +24,7 @@ const sequelize = new Sequelize({
     port: process.env.DB_PORT,
     dialect: 'postgres',
     logging: false
-});
+  });
+}
 
 module.exports = sequelize;
